@@ -1,1 +1,107 @@
-http://localhost:8888/notebooks/PyberScript.ipynb
+# Dependencies
+import matplotlib.pyplot as plt
+import numpy as np
+import pandas as pd
+import seaborn as sns
+
+# Read CSV files
+city_data = pd.read_csv("CityData")
+ride_data = pd.read_csv("RideData")
+
+# Drop any duplicate values
+city_data = city_data.drop_duplicates('city')
+# Check city data
+city_data.head()
+
+# Check ride data
+ride_data.head()
+
+# combine both data sets
+pyber_data = city_data.merge(ride_data, on = 'city', how = 'outer')
+pyber_data.head()
+
+# Create separate data frames based on city types - Urban, Suburban and Rural
+urban_city = pyber_data.loc[(pyber_data["type"] == "Urban")]
+suburban_city = pyber_data.loc[(pyber_data["type"] == "Suburban")]
+rural_city = pyber_data.loc[(pyber_data["type"] == "Rural")]
+
+# Per city calculations of Average Fare, Total Rides and Total Drivers for Urban cities
+avg_fare_urban_city = urban_city.groupby(['city'])['fare'].mean()
+total_rides_urban_city = urban_city.groupby(['city']).count()['ride_id']
+total_drivers_urban_city = urban_city.groupby(['city'])['driver_count'].value_counts()
+
+# Per city calculations of Average Fare, Total Rides and Total Drivers for Suburban cities
+avg_fare_suburban_city = suburban_city.groupby(['city'])['fare'].mean()
+total_rides_suburban_city = suburban_city.groupby(['city']).count()['ride_id']
+total_drivers_suburban_city = suburban_city.groupby(['city'])['driver_count'].value_counts()
+
+# Per city calculations of Average Fare, Total Rides and Total Drivers for Rural cities
+avg_fare_rural_city = rural_city.groupby(['city'])['fare'].mean()
+total_rides_rural_city = rural_city.groupby(['city']).count()['ride_id']
+total_drivers_rural_city = rural_city.groupby(['city'])['driver_count'].value_counts()
+
+# Create scatter plots for Urban, Suburban and Rural cities
+plt.scatter(total_rides_urban_city, avg_fare_urban_city,s=total_drivers_urban_city*10,
+            marker ='o', facecolors ="lightcoral", edgecolors='black',alpha = 0.5, label="Urban")
+
+plt.scatter(total_rides_suburban_city, avg_fare_suburban_city,s=total_drivers_suburban_city*10,
+            marker ='o', facecolors ="lightskyblue", edgecolors='black',alpha = 0.5, label="Suburban")
+
+plt.scatter(total_rides_rural_city, avg_fare_rural_city,s=total_drivers_rural_city*10,
+            marker ='o', facecolors ="gold", edgecolors='black',alpha = 0.55, label="Rural")
+           
+           # Chart title
+plt.title("CityData")
+# x label
+plt.xlabel("RideData")
+# y label
+plt.ylabel("Average Fare($)")
+# legend 
+plt.legend(loc='upper right')
+
+# Save an image of the chart and print to screen
+plt.savefig("CityData")
+plt.show()
+
+
+# Calculate Total Fare by City Type
+total_fare = pyber_data.groupby(['type'])['fare'].sum()
+# Labels for the sections of our pie chart
+labels = ["Rural","Suburban","Urban" ]
+# The colors of each section of the pie chart
+colors = ["gold","lightskyblue","lightcoral"]
+explode = (0, 0, 0.1)
+plt.title("% of Total Fares By City Types")
+plt.pie(total_fare, explode=explode, labels=labels, colors=colors, autopct="%1.1f%%",shadow=True, startangle=160)
+plt.axis("equal")
+plt.savefig("CityData")
+plt.show()
+
+# Calculate Total Fare by City Type
+total_rides = pyber_data.groupby(['type'])['ride_id'].count()
+# Labels for the sections of our pie chart
+labels = ["Rural","Suburban","Urban" ]
+# The colors of each section of the pie chart
+colors = ["gold","lightskyblue","lightcoral"]
+explode = (0, 0, 0.1)
+plt.title("% of Total Rides By City Types")
+plt.pie(total_rides, explode=explode, labels=labels, colors=colors,
+        autopct="%1.1f%%", shadow=True, startangle=140)
+plt.axis("equal")
+plt.savefig("CityData")
+plt.show()
+
+
+# Calculate Total Drivers by City Type
+total_drivers = city_data.groupby(['type'])['driver_count'].sum()
+# Labels for the sections of our pie chart
+labels = ["Rural","Suburban","Urban" ]
+# The colors of each section of the pie chart
+colors = ["gold","lightskyblue","lightcoral"]
+explode = (0, 0, 0.1)
+plt.title("% of Total Drivers By City Types")
+plt.pie(total_drivers, explode=explode, labels=labels, colors=colors,
+        autopct="%1.1f%%", shadow=True, startangle=140)
+plt.axis("equal")
+plt.savefig("CityData")
+plt.show()
